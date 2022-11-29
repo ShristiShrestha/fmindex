@@ -1,6 +1,6 @@
 import time
 
-txt = open('dna.txt')
+txt = open('small_text.txt')
 fulltext = txt.read() + "$"
 
 """
@@ -9,6 +9,7 @@ Task 2 - 0
 - sort s12 suffixes
 - sort s0 suffix
 """
+
 
 def create_sa(text):
     """ Task 2 - 0 """
@@ -34,6 +35,7 @@ def create_sa(text):
     merged_sa = merge_sa(text, s0, s12, inverse_sa)
     return merged_sa
 
+
 # construct s12
 def create_s12(text):
     # creating the array
@@ -47,6 +49,7 @@ def create_s12(text):
         elif (idx % 3) == 2:
             s2.append(idx)
     return s1 + s2
+
 
 # sort s12 suffixes
 def bucketsort(text, sa, s0=False):
@@ -79,16 +82,19 @@ def bucketsort(text, sa, s0=False):
             rank += 1
 
     # combine s12 and ranks
-    s12_with_ranks = [(ranks.get(''.join([str(x) for x in get_triplet(text, idx_original)])), idx_original) for idx_original in sa]
+    s12_with_ranks = [(ranks.get(''.join([str(x) for x in get_triplet(text, idx_original)])), idx_original) for
+                      idx_original in sa]
     return s12_with_ranks
+
 
 def get_triplet(text, idx):
     triplet = []
-    for text_idx in range(idx, min(idx+3, len(text))):
+    for text_idx in range(idx, min(idx + 3, len(text))):
         triplet.append(text[text_idx])
     while len(triplet) < 3 and isinstance(triplet, str):
         triplet.append("$")
     return triplet
+
 
 # sort s0 suffix
 def create_s0(text, s12):
@@ -107,17 +113,21 @@ def create_s0(text, s12):
     s0 = [x[1] for x in sorted(s0_with_ranks, key=lambda x: x[0])]
     return s0
 
+
 """
 Task 2 - 1
 - merge s0 and s12
 - for this you need to create the inverse_sa
 """
+
+
 # create the inverse sa for the merge
 def create_inverse_sa(len_text, sa):
     inverse_sa = [-1] * len_text
     for sa_idx in range(len(sa)):
         inverse_sa[sa[sa_idx]] = sa_idx
     return inverse_sa
+
 
 def merge_sa(text, s0, s12, inverse_sa):
     sa = []
@@ -181,11 +191,17 @@ def merge_sa(text, s0, s12, inverse_sa):
                     break
     return sa
 
+
 if __name__ == "__main__":
     # preprocess
     seconds1 = time.time()
     sa = create_sa(fulltext)
-    inverse_sa = create_inverse_sa(len(fulltext), sa)
+    # inverse_sa = create_inverse_sa(len(fulltext), sa)
+    # inverse_sa_text = ""
+    # for i in inverse_sa:
+    #     inverse_sa_text += fulltext[i-1]
+    # print("Inverse text: ", inverse_sa_text)
+
     print("suffix array..", sa)
     bwt = ""
     for index in sa:

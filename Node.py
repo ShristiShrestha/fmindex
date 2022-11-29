@@ -43,12 +43,10 @@ class Node(object):
         self.__decode_data()
         self.__create_RRR()
 
-        # SHRISTI SHRESTHA
         # counter for 1s for every block in the node
         self.block_ends = []
         self.block_size = len(self.full_data) if len(self.full_data) < 20 else 20
         self.__create_block_ends()
-        # SHRISTI SHRESTHA
 
         if self.__size() == 1:
             return
@@ -63,7 +61,6 @@ class Node(object):
             return -1
         bit = self.__get_bit(character)
         position_size = self.__get_rank(position, bit)  # Calculate the rank
-        # position_size = self.__get_rank(position, bit)  # Calculate the rank
         if self.__size() == 2:  # When the size is 2 then i find leaf and must finish
             return position_size
         if bit:  # For true(1) go to the right child, for false(0) go to the left child
@@ -117,7 +114,7 @@ class Node(object):
             curent_position += 1
         return -1
 
-    # SHRISTI SHRESTHA
+    #
     def __get_rank_from_block_ends(self, position=None, bit=None):
         if position is None or bit is None:
             print("Please give correct parameters")
@@ -157,7 +154,7 @@ class Node(object):
             print("Please give correct parameters")
             return -1
 
-        # SHRISTI SHRESTHA
+        #
         # Initially it was only / that throws error that
         # index cannot be a float, must be an integer
         # MUST - make sure position is localized correctly
@@ -245,7 +242,7 @@ class Node(object):
                 return self.bits_data[self.data.index(data)]
         return None
 
-    # SHRISTI SHRESTHA
+    #
     # self.block_ends stores no of 1s count in every block
     # e.g. [1, 4] -> from 0 to (block_size - 1) there is 1 number of 1s
     # and from block_size to (2*block_size - 1) there are 4 number of 1s
@@ -269,7 +266,7 @@ class Node(object):
             counter += 1
 
     # Create the RRR Node that make the rank very fast
-    # SHRISTI SHRESTHA - We have to implement blocking may be here
+    # We have to implement blocking may be here
     # at the end of each block, store count in that block
     def __create_RRR(self):
         counter = 0
