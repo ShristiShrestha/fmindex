@@ -41,6 +41,11 @@ class FileReader(object):
             return None
         return self.character
 
+    def get_text(self):
+        if len(self.character) == 0:
+            return None
+        return "".join(self.character)
+
     def is_read(self):
         if len(self.character) == 0:
             return False

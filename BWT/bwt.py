@@ -52,7 +52,8 @@ def create_s12(text):
 
 
 # sort s12 suffixes
-def bucketsort(text, sa, s0=False):
+
+def bucketsort(current_text, sa, s0=False):
     triplet_idx = 2
     if s0:
         triplet_idx = 0
@@ -63,7 +64,7 @@ def bucketsort(text, sa, s0=False):
         buckets = dict()
 
         for text_idx in sorted_sa:
-            triplet = get_triplet(text, text_idx)
+            triplet = get_triplet(current_text, text_idx)
             checked_i = i if i < len(triplet) else len(triplet) - 1
             if triplet[checked_i] not in buckets:
                 buckets[triplet[checked_i]] = []
@@ -76,16 +77,15 @@ def bucketsort(text, sa, s0=False):
     rank = 1
 
     for text_idx in sorted_sa:
-        triplet = ''.join([str(x) for x in get_triplet(text, text_idx)])
+        triplet = ''.join([str(x) for x in get_triplet(current_text, text_idx)])
         if triplet not in ranks:
             ranks[triplet] = rank
             rank += 1
 
     # combine s12 and ranks
-    s12_with_ranks = [(ranks.get(''.join([str(x) for x in get_triplet(text, idx_original)])), idx_original) for
+    s12_with_ranks = [(ranks.get(''.join([str(x) for x in get_triplet(current_text, idx_original)])), idx_original) for
                       idx_original in sa]
     return s12_with_ranks
-
 
 def get_triplet(text, idx):
     triplet = []

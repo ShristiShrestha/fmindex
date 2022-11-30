@@ -11,7 +11,7 @@ class WaveletTree(object):
 
     def __init__(self, data=None):
         if data is None:
-            print("Please give correct parameters")
+            print("Wavelet tree initialization error: Please give correct parameters")
             return
         self.__root = Node(data)  # Create the parent node
 
@@ -21,19 +21,19 @@ class WaveletTree(object):
 
     def rank_query(self, character=None, position=None):
         if character is None or position is None or position <= 0:
-            print("Please give correct parameters")
+            print("Rank error for: ", character , " for position: ", position, "Please give correct parameters")
             return -1
         return self.__root.get_rank_query(position, character)
 
     def select_query(self, character=None, position=None):
         if character is None or position is None or position <= 0:
-            print("Please give correct parameters")
+            print("Select error for: ", character, " for position: ", position, "Please give correct parameters")
             return -1
         return self.__root.get_select_query(position, character)
 
     def track_symbol(self, position=None):
         if position is None or position <= 0:
-            print("Please give correct parameters")
+            print("Track error for: ", position , "Please give correct parameters")
             return -1
         return self.__root.get_track_symbol(position)
 

@@ -61,7 +61,7 @@ class Node(object):
             return -1
         bit = self.__get_bit(character)
         position_size = self.__get_rank(position, bit)  # Calculate the rank
-        if self.__size() == 2:  # When the size is 2 then i find leaf and must finish
+        if len(self.childern) < 1:  # When there are no children, return its rank
             return position_size
         if bit:  # For true(1) go to the right child, for false(0) go to the left child
             return self.childern[1].get_rank_query(position_size, character)
