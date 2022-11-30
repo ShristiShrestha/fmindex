@@ -7,8 +7,16 @@ from WaveletTree import WaveletTree
 
 
 def main():
-    texts = ["abracadra", "aaabbccccbba"]
-    patterns = [["ab", "a", "/n"], ["aaab", "ds", "bb", "\\n"], ["m", "ss", "pp", "i", "ii", "B"]]
+    texts = [
+        "abracadra",
+        "aaabbccccbba",
+        "mississippi",
+        "winningIsSoHappeningSeeForYourselfIseeItIsHappening"
+    ]
+    patterns = [["aba", "a", "/n"],
+                ["aaab", "ds", "bb", "\\n"],
+                ["m", "ss", "pp", "i", "ii", "B"],
+                ["ing", "in", "ning", "win", "is"]]
 
     # file_reader = FileReader("./short_text.txt")
     # if not file_reader.is_read():

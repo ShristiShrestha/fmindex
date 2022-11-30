@@ -19,8 +19,10 @@ class WaveletTree(object):
     Query Functions
     """
 
+    # if query string is N size, using N as position in rank_query,
+    # finds out how many such chars exist in [0,N-1] string
     def rank_query(self, character=None, position=None):
-        if character is None or position is None or position <= 0:
+        if character is None or position is None or position < 0:
             print("Rank error for: ", character , " for position: ", position, "Please give correct parameters")
             return -1
         return self.__root.get_rank_query(position, character)
