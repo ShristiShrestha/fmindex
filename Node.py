@@ -191,6 +191,8 @@ class Node(object):
             print("Please give correct parameters")
             return -1
         rb_position = position // self.block_size
+        # ONLY A HACK METHOD
+        rb_normalized = rb_position if rb_position < len(self.block_ends) else rb_position - 1
         rank = self.block_ends[rb_position]
         last_position = self.block_size * rb_position
         while last_position < position:

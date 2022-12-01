@@ -8,12 +8,15 @@ from WaveletTree import WaveletTree
 
 def main():
     texts = [
+        "banana",
         "abracadra",
         "aaabbccccbba",
         "mississippi",
         "winningIsSoHappeningSeeForYourselfIseeItIsHappening"
     ]
-    patterns = [["aba", "a", "/n"],
+    patterns = [
+                ["b", "nan", "ana"],
+                ["aba", "a", "/n"],
                 ["aaab", "ds", "bb", "\\n"],
                 ["m", "ss", "pp", "i", "ii", "B"],
                 ["ing", "in", "ning", "win", "is"]]
