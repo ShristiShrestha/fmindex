@@ -1,19 +1,14 @@
-'''
-Created on Jun 9, 2014
-
-@author: nectarios
-'''
-
-# MAY BE: no of blocks storing 3*5 bits only
+# 3 blocks in each super block
 # MUST make it dynamic like full_data_size // log2(full_data_size)
 BLOCKS_NUM = 3
 
-# MAY BE: size of a block in
+# size of a block in
 # terms of number of bits it has
 # MUST make it dynamic to the size of chars
 # in the node like log2(full_data_size)
 BITS_NUM = 5
 
+# number of super blocks a node can have is 3+1
 SUPER_BLOCK_SIZE = 3
 
 
@@ -22,7 +17,7 @@ class Node(object):
     classdocs
     '''
 
-    def __init__(self, data=None, parent=None, from_left_parent=None):
+    def __init__(self, data=None, parent=None, from_left_parent=None, block_size=None):
         '''
         Constructor
         '''
@@ -41,15 +36,18 @@ class Node(object):
         self.rb = []
 
         self.__decode_data()
-        self.__create_RRR()
+        # self.__create_RRR()
 
         # counter for 1s for every block in the node
         self.block_ends = []
-        self.block_size = len(self.full_data) if len(self.full_data) < 20 else 20
+        self.block_size = block_size
+
+        # count 1s in interval of block_size
         self.__create_block_ends()
 
-        if self.__size() == 1:
+        if self.__size() <= 1:
             return
+
         self.__gen_tree()
 
     """
@@ -61,11 +59,40 @@ class Node(object):
             return -1
         bit = self.__get_bit(character)
         position_size = self.__get_rank(position, bit)  # Calculate the rank
+        # if this node is leaf, in that case
+        # position_size will have value position - rank, and it is problematic
+        # since chars in leaf node are the number of that chars in the whole string
+        # so if this node is left leaf node, position_size = position - rank = 0
+        # how? position equals the size of current node's full bits array
+        # and that whole full data array is same chars in case of leaf node
+        # therefore the above query __get_rank will return 0 for left leaf node
+        if len(self.bits_data) == 1 and position_size == 0:
+            return position - position_size  # position - (position - rank)
         if len(self.childern) < 1:  # When there are no children, return its rank
             return position_size
         if bit:  # For true(1) go to the right child, for false(0) go to the left child
             return self.childern[1].get_rank_query(position_size, character)
         return self.childern[0].get_rank_query(position_size, character)
+
+    def get_rank_query_alt(self, position=None, character=None):
+        if self.__full_size() < position:
+            return -1
+        bit = self.__get_bit(character)
+        position_size = self.__get_rank_from_block_ends(position, bit)  # Calculate the rank
+        # if this node is leaf, in that case
+        # position_size will have value position - rank, and it is problematic
+        # since chars in leaf node are the number of that chars in the whole string
+        # so if this node is left leaf node, position_size = position - rank = 0
+        # how? position equals the size of current node's full bits array
+        # and that whole full data array is same chars in case of leaf node
+        # therefore the above query __get_rank will return 0 for left leaf node
+        if len(self.bits_data) == 1 and position_size == 0:
+            return position - position_size  # position - (position - rank)
+        if len(self.childern) < 1:  # When there are no children, return its rank
+            return position_size
+        if bit:  # For true(1) go to the right child, for false(0) go to the left child
+            return self.childern[1].get_rank_query_alt(position_size, character)
+        return self.childern[0].get_rank_query_alt(position_size, character)
 
     def get_select_query(self, position=None, character=None):
         leaf = self.__get_leaf(character)  # Get the leaf where the character is
@@ -114,36 +141,6 @@ class Node(object):
             curent_position += 1
         return -1
 
-    #
-    def __get_rank_from_block_ends(self, position=None, bit=None):
-        if position is None or bit is None:
-            print("Please give correct parameters")
-            return -1
-
-        # assuming position starts from 0
-        # e.g. let's say block_size = 5, position = 4, and total bits = 13
-
-        total_bits = len(self.bits_full_data)
-        valid_position = position if position < total_bits else (total_bits - 1)
-        # no of blocks after which this position appears
-        # ANS: 1, use index 1 in block_ends for total no of 1s in that block
-        # so the position only scan index 1 block in self.block_ends
-        position_block_index = valid_position // self.block_size
-
-        # min and max index in the block we are now going to scan
-        first_block_index = (position_block_index * self.block_size) - 1
-
-        # is it possible that position index goes
-        # beyond the block in that area ??
-        # count up to position
-        bit_counter = self.block_ends[position_block_index]
-        index_counter = first_block_index
-        while index_counter < (valid_position if valid_position < total_bits else total_bits):
-            if self.bits_full_data[index_counter]:
-                bit_counter += 1
-            index_counter += 1
-        return bit_counter
-
     # rank refers to count of a char appearing before position
     # (excluding position), so basically how many times that char
     # appear before that position. However, instead of char, we inspect bit.
@@ -154,19 +151,27 @@ class Node(object):
             print("Please give correct parameters")
             return -1
 
-        #
-        # Initially it was only / that throws error that
+        # Initially it was only / that resulted in error
         # index cannot be a float, must be an integer
         # MUST - make sure position is localized correctly
 
         # e.g. if position 10 then BLOCKS_NUM (3) * BITS_NUM (5) = 15
-        rs_position = position // (BLOCKS_NUM * BITS_NUM)  # 0
-        rb_position = position // BITS_NUM  # 2
+        rs_position = position // (BLOCKS_NUM * BITS_NUM)  # eq 1; 0 number of (BLOCKS_NUM*BITS_NUM)
+        rb_position = position // BITS_NUM  # eq 2; 2 i.e. number of BITS_NUM times
 
+        # index out of range error for dna.txt
         rank = self.rs[rs_position]
-        # Check if the position is at the same area, if is then ignore the rb
-        if (((position % (BLOCKS_NUM * BITS_NUM)) != 0) and (
-                ((rs_position * BLOCKS_NUM) != rb_position) or (rs_position == 0))):
+
+        # Now, Check if the position is at the same area, if is then ignore the rb
+
+        # first and condn is already covered by self.rs[rs_position] above
+
+        # second and cond is true when rb_position is not multiple of BLOCKS_NUM as it
+        # is already covered by self.rs[rs_position] above,
+        # think abt it by substituting BITS_NUM from eq2 into eq 1
+        # or when u r in first super block which is index 0
+        if (((position % (BLOCKS_NUM * BITS_NUM)) != 0)
+                and (((rs_position * BLOCKS_NUM) != rb_position) or (rs_position == 0))):
             rank += self.rb[rb_position]
         # Calculate the remaining bits
         last_position = (BITS_NUM * rb_position)
@@ -176,6 +181,24 @@ class Node(object):
                 rank += 1
             last_position += 1
 
+        # So rank is the number of 1s, so when you go left number of 0s is (total - num of 1s)
+        if bit:  # If i look for True(1) okay return, if i look for False(0) then return the position - rank
+            return rank
+        return position - rank
+
+    def __get_rank_from_block_ends(self, position=None, bit=None):
+        if position is None or bit is None:
+            print("Please give correct parameters")
+            return -1
+        rb_position = position // self.block_size
+        rank = self.block_ends[rb_position]
+        last_position = self.block_size * rb_position
+        while last_position < position:
+            value = self.bits_full_data[last_position]
+            if value:
+                rank += 1
+            last_position += 1
+        # So rank is the number of 1s, so when you go left number of 0s is (total - num of 1s)
         if bit:  # If i look for True(1) okay return, if i look for False(0) then return the position - rank
             return rank
         return position - rank
@@ -199,8 +222,8 @@ class Node(object):
             else:
                 left.append(self.full_data[index])
             index += 1
-        self.__add_child(Node(left, self, True))
-        self.__add_child(Node(right, self, False))
+        self.__add_child(Node(left, self, True, self.block_size))  # left child is 0 index
+        self.__add_child(Node(right, self, False, self.block_size))  # right child is 1 index
 
     def __decode_data(self):  # Decode the data
         while len(self.bits_data) != self.__size():
@@ -248,22 +271,30 @@ class Node(object):
     # and from block_size to (2*block_size - 1) there are 4 number of 1s
     # pattern for counter -> 1,2,3,4,1,2,3,4 incase block_size is 5
     def __create_block_ends(self):
-        true_counter = 0  # no of 1s in every block
-        counter = 1  # 0 to (block_size)-1 index
-        for bit_item in self.bits_full_data:
-            if counter == (len(self.bits_full_data) - 1):
-                self.block_ends.append(true_counter + (1 if bit_item else 0))
-                return
-            # scan is within block size i.e. counter < block_size
-            elif counter % self.block_size != 0:
-                if bit_item:
-                    true_counter += 1
-            # scan reaches the block border i.e. counter == block_size
-            else:
-                self.block_ends.append(true_counter)
-                # don't forget current bit_item
-                true_counter = 1 if bit_item else 0
+        counter = 0
+        rb_counter = 0
+        num_blocks = 0
+
+        self.block_size = 5 if self.block_size is None else self.block_size
+
+        # by default 1 block has 0 1s
+        self.block_ends.append(rb_counter)
+
+        for data in self.bits_full_data:
+            # periodically append cumulative count in each block
+            # each block_end stores count for block_size bits upto that
+            # position in the strings (within that node)
+            if ((counter % self.block_size) == 0) and (counter != 0):
+                self.block_ends.append(rb_counter)
+                num_blocks += 1
+            if data:
+                rb_counter += 1
             counter += 1
+
+        # few bits may have been left but not included in a block
+        rem_for_new_block = rb_counter - self.block_ends[len(self.block_ends) - 1]
+        if rem_for_new_block > 0:
+            self.block_ends.append(rb_counter)
 
     # Create the RRR Node that make the rank very fast
     # We have to implement blocking may be here
@@ -275,17 +306,20 @@ class Node(object):
         rs_counter = 0
         rb_counter = 0
         self.rb.append(rb_counter)
-        # Calculate how many True(1) have the Node,
+        # Calculate how many True(1) have in current Node,
         # to calculate the rs and rb.
         # rs is for the super block and
-        # rb is for the block
+        # rb is for the block ;
         for data in self.bits_full_data:
-            # BITS_NUM = 5
+            # BITS_NUM = 5; after every 5 chars, append block count
+            # also increase number of blocks
             if ((counter % BITS_NUM) == 0) and (counter != 0):
                 self.rb.append(rb_counter)
                 num_of_block += 1
 
-            # BLOCKS_NUM=3
+            # BLOCKS_NUM=3; BITS_NUM=5 ==> 15
+            # after every 15 chars, append super block count
+            # also increase number of super blocks
             if counter % (BLOCKS_NUM * BITS_NUM) == 0:
                 self.rs.append(rs_counter)
                 num_of_super_block += 1
@@ -294,8 +328,15 @@ class Node(object):
             if data:
                 rs_counter += 1
                 rb_counter += 1
+
             counter += 1
+
+        # count since last super block; remember on every new superblock creation
+        # rb-counter is rest to 0
         self.rb.append(rb_counter)
+
+        # what if number of super blocks is more than 4 since
+        # SUPER_BLOCK_SIZE is 3
         while num_of_super_block < SUPER_BLOCK_SIZE + 1:
             self.rs.append(rs_counter)
             num_of_super_block += 1
