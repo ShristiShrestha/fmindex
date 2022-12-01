@@ -191,7 +191,13 @@ class Node(object):
             print("Please give correct parameters")
             return -1
         rb_position = position // self.block_size
-        rank = self.block_ends[rb_position]
+        # ONLY A HACK METHOD
+        # rb_normalized = rb_position if rb_position < len(self.block_ends) else rb_position - 1
+        # rank = self.block_ends[rb_normalized]
+        # better approach
+        if (rb_position == 0) or ((rb_position * self.block_size) != position):
+            rank = self.block_ends[rb_position]
+
         last_position = self.block_size * rb_position
         while last_position < position:
             value = self.bits_full_data[last_position]
