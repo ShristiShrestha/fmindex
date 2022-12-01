@@ -61,6 +61,8 @@ class Node(object):
             return -1
         bit = self.__get_bit(character)
         position_size = self.__get_rank(position, bit)  # Calculate the rank
+        if len(self.bits_data) == 1 and position_size == 0:
+            return position - position_size  # position - (position - rank)
         if len(self.childern) < 1:  # When there are no children, return its rank
             return position_size
         if bit:  # For true(1) go to the right child, for false(0) go to the left child
