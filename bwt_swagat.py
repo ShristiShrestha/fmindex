@@ -1,7 +1,5 @@
 import time
 
-txt = open('small_text.txt')
-fulltext = txt.read() + "$"
 
 """
 Task 2 - 0
@@ -193,37 +191,12 @@ def merge_sa(text, s0, s12, inverse_sa):
 
 
 def create_bwt(text):
-    # preprocess
     seconds1 = time.time()
-    sa = create_sa(fulltext)
-    # inverse_sa = create_inverse_sa(len(fulltext), sa)
-    # inverse_sa_text = ""
-    # for i in inverse_sa:
-    #     inverse_sa_text += fulltext[i-1]
-    # print("Inverse text: ", inverse_sa_text)
+    sa = create_sa(text)
     bwt = ""
     for index in sa:
-        bwt += fulltext[index - 1]
+        bwt += text[index - 1]
     seconds2 = time.time()
-    print("BWT: ", bwt)
     print("Time taken: ", seconds2 - seconds1)
-    return bwt
+    return bwt, seconds2 - seconds1
 
-
-if __name__ == "__main__":
-    # preprocess
-    seconds1 = time.time()
-    sa = create_sa(fulltext)
-    # inverse_sa = create_inverse_sa(len(fulltext), sa)
-    # inverse_sa_text = ""
-    # for i in inverse_sa:
-    #     inverse_sa_text += fulltext[i-1]
-    # print("Inverse text: ", inverse_sa_text)
-
-    print("suffix array..", sa)
-    bwt = ""
-    for index in sa:
-        bwt += fulltext[index - 1]
-    seconds2 = time.time()
-    print("BWT: ", bwt)
-    print("Time taken: ", seconds2 - seconds1)
