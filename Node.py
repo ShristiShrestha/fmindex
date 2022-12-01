@@ -193,8 +193,8 @@ class Node(object):
         rb_position = position // self.block_size
         # ONLY A HACK METHOD
         rb_normalized = rb_position if rb_position < len(self.block_ends) else rb_position - 1
-        rank = self.block_ends[rb_position]
-        last_position = self.block_size * rb_position
+        rank = self.block_ends[rb_normalized]
+        last_position = self.block_size * rb_normalized
         while last_position < position:
             value = self.bits_full_data[last_position]
             if value:
