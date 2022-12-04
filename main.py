@@ -37,7 +37,7 @@ def plot(file, pattern):
 
         tracemalloc.stop()
         start1 = time.time_ns()
-        fm = fmindex.match_alt(pattern, wavelet_tree, len(bwt_chars))
+        fm = fmindex.match(pattern, wavelet_tree, len(bwt_chars))
         print("Pattern: ", pattern, ": ", fm)
         end1 = time.time_ns()
         timeList.append(end1 - start0)
@@ -60,6 +60,9 @@ def plot(file, pattern):
     plt.xlabel('Number of Blocks in Wavelet Tree')
     plt.show()
 
-plot("./test/dna.txt", "AAGGA")
-plot("./test/english.txt", "course")
-plot("./test/protein_data.txt", "SGAPPPE")
+
+plot("./test/small_text.txt", "ssii")
+
+# plot("./test/dna.txt", "AAGGA")
+# plot("./test/english.txt", "course")
+# plot("./test/protein_data.txt", "SGAPPPE")
