@@ -1,18 +1,24 @@
 import time
+def BWT(text: str, sa: list):
+    """
+    returns BWT of the given text  with respect to its Suffix Array
+    """
+    return list(text[i - 1] for i in sa)
 
-txt = open('small_text.txt')
-fulltext = txt.read() + "$"
+def getDict(bwt_list):
+    """
+    this function returns a dictionary of of each character in the alphabet with its rank in the alphabet. this is derived from the BWT and is used in calculating the FM-index
+    """
+    C_dict = {}
+    sorted_BWT=sorted(bwt_list)
+    for char in set(sorted_BWT):
+        C_dict[char] = sorted_BWT.index(char)
+    return C_dict
 
-"""
-Task 2 - 0
-- construct s12
-- sort s12 suffixes
-- sort s0 suffix
-"""
 
+#My Code
 
 def create_sa(text):
-    """ Task 2 - 0 """
     # construct s12
     s12_unsorted = create_s12(text)
 
@@ -191,39 +197,12 @@ def merge_sa(text, s0, s12, inverse_sa):
                     break
     return sa
 
-
 def create_bwt(text):
-    # preprocess
     seconds1 = time.time()
-    sa = create_sa(fulltext)
-    # inverse_sa = create_inverse_sa(len(fulltext), sa)
-    # inverse_sa_text = ""
-    # for i in inverse_sa:
-    #     inverse_sa_text += fulltext[i-1]
-    # print("Inverse text: ", inverse_sa_text)
+    sa = create_sa(text)
     bwt = ""
     for index in sa:
-        bwt += fulltext[index - 1]
+        bwt += text[index - 1]
     seconds2 = time.time()
-    print("BWT: ", bwt)
     print("Time taken: ", seconds2 - seconds1)
-    return bwt
-
-
-if __name__ == "__main__":
-    # preprocess
-    seconds1 = time.time()
-    sa = create_sa(fulltext)
-    # inverse_sa = create_inverse_sa(len(fulltext), sa)
-    # inverse_sa_text = ""
-    # for i in inverse_sa:
-    #     inverse_sa_text += fulltext[i-1]
-    # print("Inverse text: ", inverse_sa_text)
-
-    print("suffix array..", sa)
-    bwt = ""
-    for index in sa:
-        bwt += fulltext[index - 1]
-    seconds2 = time.time()
-    print("BWT: ", bwt)
-    print("Time taken: ", seconds2 - seconds1)
+    return bwt, seconds2 - seconds1

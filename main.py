@@ -1,38 +1,65 @@
+import tracemalloc
 import sys
 import time
-# from memory_profiler import profile
+from matplotlib import pyplot as plt
 
-from BWT import BWT
-from SA_BWT import getBwt
-from FileReader import FileReader
-from Fmindex import Fmindex
-from WaveletTree import WaveletTree
+from BWT.bwt import create_bwt, getDict
+from fm_index.Fmindex import Fmindex
+from wt_tree.FileReader import FileReader
+from wt_tree.WaveletTree import WaveletTree
 
+def plot(file, pattern):
+    file_reader = FileReader(file)
+    if not file_reader.is_read():
+        sys.exit()
+    # Find Suffix Array and BWT
+    (bwt, diff_seconds) = create_bwt(file_reader.get_text() + "$")
+    fmindex = Fmindex(bwt)
+    tracemalloc.start()
 
-def main():
-    texts = [
-        "banana",
-        "abracadra",
-        "aaabbccccbba",
-        "mississippi",
-        "winningIsSoHappeningSeeForYourselfIseeItIsHappening"
-    ]
-    patterns = [
-                ["b", "nan", "ana"],
-                ["aba", "a", "/n"],
-                ["aaab", "ds", "bb", "\\n"],
-                ["m", "ss", "pp", "i", "ii", "B"],
-                ["ing", "in", "ning", "win", "is"]]
+    bwt_chars = [char for char in bwt]
+    BWTcurrent, BWTpeak = tracemalloc.get_traced_memory()
+    print("BWT memory peak in MB:", BWTcurrent)
+    tracemalloc.stop()
+    timeList = []
+    spaceList = []
+    WTtimeLIst = []
+    for i in range(1, 21):
+        tracemalloc.start()
+        start0 = time.time_ns()
+        wavelet_tree = WaveletTree(bwt_chars, i)
+        end0 = time.time_ns()
+        WTtimeLIst.append(end0 - start0)
+        print("size of object: ", sys.getsizeof(wavelet_tree))
+        current, peak = tracemalloc.get_traced_memory()
+        peakMB = peak / (1024 * 1024)
+        spaceList.append(peakMB)
 
-    for index, text in enumerate(texts):
-        (bwt, diff_seconds) = BWT(text).get_bwt()
-        fmindex = Fmindex(bwt)
-        bwt_chars = [char for char in bwt]
-        wavelet_tree = WaveletTree(bwt_chars, 5)
-        print("String ", text)
-        for pat in patterns[index]:
-            print("Pattern: ", pat, ": ", fmindex.match_alt(pat, wavelet_tree, len(bwt)))
+        tracemalloc.stop()
+        start1 = time.time_ns()
+        fm = fmindex.match_alt(pattern, wavelet_tree, len(bwt_chars))
+        print("Pattern: ", pattern, ": ", fm)
+        end1 = time.time_ns()
+        timeList.append(end1 - start0)
+        print(end1 - start1)
+        del wavelet_tree, current, peakMB, peak, fm
 
+    plt.figure(1)
+    plt.scatter([str(i) for i in range(1, 21)], WTtimeLIst)
+    plt.ylabel('Wavelet Tree creation time in ns')
+    plt.xlabel('Number of Blocks in Wavelet Tree')
 
-if __name__ == '__main__':
-    main()
+    plt.figure(2)
+    plt.scatter([str(i) for i in range(1, 21)], spaceList)
+    plt.ylabel('Wavelet Tree creation memory usage in MB')
+    plt.xlabel('Number of Blocks in Wavelet Tree')
+
+    plt.figure(3)
+    plt.scatter([str(i) for i in range(1, 21)], timeList)
+    plt.ylabel('Pattern matching runtime in ns')
+    plt.xlabel('Number of Blocks in Wavelet Tree')
+    plt.show()
+
+plot("./test/dna.txt", "AAGGA")
+plot("./test/english.txt", "course")
+plot("./test/protein_data.txt", "SGAPPPE")
