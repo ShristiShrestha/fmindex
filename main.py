@@ -54,22 +54,22 @@ def plot(file, pattern):
     plt.figure(1)
     plt.scatter([str(i) for i in range(4, 21)], WTtimeLIst)
     plt.ylabel('Wavelet Tree creation time in ns')
-    plt.xlabel('Number of Blocks in Wavelet Tree(2**i)')
+    plt.xlabel('Size of Blocks in Wavelet Tree(2**i)')
 
     plt.figure(2)
     plt.scatter([str(i) for i in range(4, 21)], spaceList)
     plt.ylabel('Wavelet Tree creation memory usage in MB')
-    plt.xlabel('Number of Blocks in Wavelet Tree(2**i)')
+    plt.xlabel('Size of Blocks in Wavelet Tree(2**i)')
 
     plt.figure(3)
     plt.plot(blockList, timeList)
     plt.ylabel('Pattern matching runtime in ns')
-    plt.xlabel('Number of Blocks in Wavelet Tree(2**i)')
+    plt.xlabel('Size of Blocks in Wavelet Tree(2**i)')
     plt.show()
 
 
 # plot("./test/small_text.txt", "ssii")
 
-# plot("./test/dna.txt", "AAGGA")
+plot("./test/dna.txt", "AAGGA")
 # plot("./test/english.txt", "course")
-plot("./test/protein_data.txt", "SGAPPPE")
+# plot("./test/protein_data.txt", "SGAPPPE")
