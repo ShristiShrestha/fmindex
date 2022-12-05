@@ -21,13 +21,14 @@ def plot(file, pattern):
     BWTcurrent, BWTpeak = tracemalloc.get_traced_memory()
     print("BWT memory peak in MB:", BWTcurrent)
     tracemalloc.stop()
+    blockList = [i for i in range(4,21)]
     timeList = []
     spaceList = []
     WTtimeLIst = []
-    for i in range(1, 21):
+    for i in range(4, 21):
         tracemalloc.start()
         start0 = time.time_ns()
-        wavelet_tree = WaveletTree(bwt_chars, i)
+        wavelet_tree = WaveletTree(bwt_chars, 2**i)
         end0 = time.time_ns()
         WTtimeLIst.append(end0 - start0)
         print("size of object: ", sys.getsizeof(wavelet_tree))
@@ -40,29 +41,35 @@ def plot(file, pattern):
         fm = fmindex.match(pattern, wavelet_tree, len(bwt_chars))
         print("Pattern: ", pattern, ": ", fm)
         end1 = time.time_ns()
-        timeList.append(end1 - start0)
+        timeList.append(end1 - start1)
         print(end1 - start1)
-        del wavelet_tree, current, peakMB, peak, fm
+        del wavelet_tree, current, peakMB, peak, fm, start1, end1, start0, end0
 
+    # for idx, item in enumerate(timeList):
+    #     if item == 0:
+    #         blockList.remove(idx + 1)
+    # blockList = [str(i) for i in blockList if timeList[i-1] != 0]    
+    # timeList = [i for i in timeList if i != 0]
+    # blockList = [str(i) for i in blockList]       
     plt.figure(1)
-    plt.scatter([str(i) for i in range(1, 21)], WTtimeLIst)
+    plt.scatter([str(i) for i in range(4, 21)], WTtimeLIst)
     plt.ylabel('Wavelet Tree creation time in ns')
-    plt.xlabel('Number of Blocks in Wavelet Tree')
+    plt.xlabel('Number of Blocks in Wavelet Tree(2**i)')
 
     plt.figure(2)
-    plt.scatter([str(i) for i in range(1, 21)], spaceList)
+    plt.scatter([str(i) for i in range(4, 21)], spaceList)
     plt.ylabel('Wavelet Tree creation memory usage in MB')
-    plt.xlabel('Number of Blocks in Wavelet Tree')
+    plt.xlabel('Number of Blocks in Wavelet Tree(2**i)')
 
     plt.figure(3)
-    plt.scatter([str(i) for i in range(1, 21)], timeList)
+    plt.plot(blockList, timeList)
     plt.ylabel('Pattern matching runtime in ns')
-    plt.xlabel('Number of Blocks in Wavelet Tree')
+    plt.xlabel('Number of Blocks in Wavelet Tree(2**i)')
     plt.show()
 
 
-plot("./test/small_text.txt", "ssii")
+# plot("./test/small_text.txt", "ssii")
 
 # plot("./test/dna.txt", "AAGGA")
 # plot("./test/english.txt", "course")
-# plot("./test/protein_data.txt", "SGAPPPE")
+plot("./test/protein_data.txt", "SGAPPPE")
