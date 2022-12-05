@@ -31,15 +31,6 @@ class Node(object):
             return -1
         bit = self.__get_bit(character)
         position_size = self.__get_rank_from_sub_blocks(position, bit)  # Calculate the rank
-        # if this node is leaf, in that case
-        # position_size will have value position - rank, and it is problematic
-        # since chars in leaf node are the number of that chars in the whole string
-        # so if this node is left leaf node, position_size = position - rank = 0
-        # how? position equals the size of current node's full bits array
-        # and that whole full data array is same chars in case of leaf node
-        # therefore the above query __get_rank will return 0 for left leaf node
-        if len(self.bits_data) == 1 and position_size == 0:
-            return position - position_size  # position - (position - rank)
         if len(self.children) < 1:  # When there are no children, return its rank
             return position_size
         if bit:  # For true(1) go to the right child, for false(0) go to the left child
@@ -52,7 +43,6 @@ class Node(object):
             print("Please give correct parameters")
             return -1
         rb_position = position // self.block_size
-        # ONLY A HACK METHOD
         rb_normalized = rb_position if rb_position < len(self.sub_blocks) else rb_position - 1
         rank = self.sub_blocks[rb_normalized]
         # some bits might have been missed
